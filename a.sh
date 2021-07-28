@@ -1,8 +1,11 @@
 #!/bin/bash
+# Author- SwapnilSoni1999, Muralivijay
 
-# Sync with configs
+#sync with configs
 source a.conf
 source build/envsetup.sh
+
+export BUILD_FINISHED=false
 
 sendMessage() {
 MESSAGE=$1
@@ -12,19 +15,41 @@ curl -s "https://api.telegram.org/bot${BOT_API_KEY}/sendmessage" --data "text=$M
 echo -e;
 }
 
-sendMessage "Starting build"
+# Make clean build
+echo "${blu}Make clean build?${txtrst}"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) mka deviceclean ; break;;
+        No ) break;;
+    esac
+done
 
-# Start Build
-#lunch $ROM\_$DEVICE-userdebug && mka bacon | tee build.log	# Enable this for standard "mka bacon"
-lunch aosp_ginkgo-userdebug && make bacon -j8	# Enable and edit this if ROM has specific "make command" (make corvus, mka aex, etc)
+# supported devices
+#echo "${blu}Which device you want to build?${txtrst}"
+#select yn in "kagura" "dora"; do
+#    case $yn in
+#        kagura ) sendMessage "Starting build $ROM for $DEVICE1" && lunch $ROM\_$DEVICE1-userdebug | tee lunch.log ; break;;
+#        dora ) sendMessage "Starting build $ROM for $DEVICE" && lunch $ROM\_$DEVICE-userdebug | tee lunch.log ; break;;
+#    esac
+#done
+
 # catch lunch error
 if [ $? -eq 0 ]
 then
+        if [ $DEVICE ]; then
+       	echo "Bringup Done... Starting Build\(brunch\)"
+	sendMessage "Bringup Done... Starting build."
+	lunch ancient_ginkgo-userdebug | tee build.log
+	make bacon -j8
+	if [ $? -eq 0 ]
+	then
+		echo "build DONE :)"
+		sendMessage "build DONE !"
 
-		echo "Build Completed! Uploading to Drive.."
-		sendMessage "Build Completed! Uploading to drive.."
+		BUILD_FINISHED=true
+		if [ $BUILD_FINISHED = true  ] ; then
 
-                        #since build iz done lets upload
+			#since build iz done lets upload
 			OUTPUT_FILE=$(grep -o -P '(?<=Package\ Complete).*(?=.zip)' build.log)'.zip'
 	#		OUTPUT_FILE=$(grep -o -P '(?<=Zip: ).*(?=.zip)' build.log)'.zip'
 			OUTPUT_LOC=$(echo $OUTPUT_FILE | cut -f2 -d":")
@@ -55,32 +80,36 @@ then
 			BEELD_FINISHED=true
 			#clean up
 			rm upload.log final.txt id.txt url.txt
-
+		fi
+	else
+		sendMessage "beeld phel nibba"
+		echo "brunch phel"
+	fi
 else
-	sendMessage "Build Failed!"
-	echo "Build Failed!"
+       	echo "Bringup PHEL..."
+	sendMessage "Bringup PHEL... sad"
 fi
 
-rm url.log
+rm lunch.log
 
-		# Some Extra Summary to share
-		MD5=`md5sum $FILE_OUTPUT | awk '{ print $1 }'`
-		SIZE=`ls -sh $FILE_OUTPUT | awk '{ print $1 }'`
+if [ $BUILD_FINISHED = true  ] ; then
 
-#if [ $DEVICE ]; then
+# Some Extra Summary to share
+MD5=`md5sum ${OUTPUT_LOC} | awk '{ print $1 }'`
+
+if [ $DEVICE ]; then
 read -r -d '' SUMMARY << EOM
-ROM: $ZIPNAME
+ROM: $ZIPNAME1
 Build: $BUILD_TYPE
 LINK: $SHARE
 NOTES: $NOTES
 MD5: $MD5
 EOM
-
+fi
                 curl -s "https://api.telegram.org/bot${BOT_API_KEY}/sendmessage" --data "text=$SUMMARY&chat_id=$CHAT_ID" 1> /dev/null
-
 echo -e;
 
-#fi
+fi
 
 
 exit 1
