@@ -1,5 +1,5 @@
 git clone https://github.com/ancient-devices/device_xiaomi_ginkgo device/xiaomi/ginkgo
-git clone --depth=1 https://github.com/ghostrider-reborn/android_kernel_xiaomi_ginkgo kernel/xiaomi/ginkgo
+git clone --depth=1 https://github.com/ArrowOS-Devices/android_kernel_xiaomi_ginkgo kernel/xiaomi/ginkgo
 git clone https://github.com/ancient-devices/vendor_xiaomi_ginkgo vendor/xiaomi/ginkgo
 rm -rf hardware/qcom-caf/sm8150/display
 git clone https://github.com/Bt-aja/hardware_qcom_display.git -b arrow-11.0-caf-sm6125 hardware/qcom-caf/sm8150/display
