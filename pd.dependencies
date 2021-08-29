@@ -1,0 +1,8 @@
+[
+    {
+        "remote":       "gitlab",
+        "repository":   "pixeldust-eleven/android_vendor_pixelgapps",
+        "target_path":  "vendor/pixelgapps",
+        "revision":     "11"
+    }
+]
